@@ -4,6 +4,11 @@
         android:label="myapp1"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+         <uses-permission android:name="android.permission.INTERNET"/>
+        <meta-data android:name="com.google.android.geo.API_KEY"
+               android:value="AIzaSyCqcRqJVuxuWWLaRTFPttjsUaC6nH1Ag2k"/>
+               <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
         <activity
             android:name=".MainActivity"
             android:exported="true"
