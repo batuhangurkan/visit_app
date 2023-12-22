@@ -68,7 +68,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 SizedBox(
-                  height: 20,
+                  height: 15,
                 ),
                 Form(
                   child: Column(
@@ -180,11 +180,9 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                       SizedBox(
-                        height: 20,
+                        height: 10,
                       ),
-                      SizedBox(
-                        height: 15,
-                      ),
+
                       InkWell(
                           onTap: () {
                             Navigator.push(

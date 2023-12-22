@@ -4,6 +4,8 @@ import 'package:myapp1/pages/bottomnavigationbar.dart';
 import 'package:myapp1/pages/date_page.dart';
 import 'package:myapp1/pages/home_page.dart';
 import 'package:myapp1/pages/login_page.dart';
+import 'package:myapp1/pages/profile_page.dart';
+import 'package:myapp1/pages/reset_password.dart';
 import 'package:myapp1/pages/splash_screen.dart';
 
 void main() async {
@@ -53,6 +55,8 @@ class MyApp extends StatelessWidget {
         '/home ': (context) => const HomePage(),
         '/date': (context) => const DatePage(),
         '/bottomnavigationbar': (context) => const BottomNavigationBarPage(),
+        '/resetpasswordpage': (context) => const ResetPasswordPage(),
+        '/profilepage': (context) => const ProfilePage(),
       },
     );
   }

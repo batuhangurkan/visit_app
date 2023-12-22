@@ -13,6 +13,7 @@ class AuthService {
         email: email, password: password);
 
     return user.user;
+
   }
 
   //Çıkış Yap Fonksiyonu
@@ -22,7 +23,7 @@ class AuthService {
 
   //Kayıt ol fonksiyonu
   Future<User?> createPerson(
-      String email, String password, String displayName) async {
+      String email, String password, String displayName, ) async {
     User? currentUser = FirebaseAuth.instance.currentUser;
     var user = await _auth.createUserWithEmailAndPassword(
       email: email,
@@ -32,7 +33,6 @@ class AuthService {
 
     await _firestore.collection("Person").doc(user.user!.email).set(
         {"email": email, "password": password, "displayName": displayName});
-
     return user.user;
   }
 }
