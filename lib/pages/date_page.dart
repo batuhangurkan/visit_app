@@ -20,9 +20,10 @@ class _DatePageState extends State<DatePage> {
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
   static const CameraPosition _kGooglePlex = CameraPosition(
-    target: LatLng(37.42796133580664, -122.085749655962),
+    target: LatLng(39.933365, 32.859741),
     zoom: 14.4746,
   );
+
 
   Future<Position> _getCurrentLocation() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
@@ -33,10 +34,15 @@ class _DatePageState extends State<DatePage> {
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.deniedForever) {
       return Future.error(
-          'Konum izni verilmedi - forever'); // Konum izni verilmedi - forever
+          'Konum izni verilmedi - forever');
+      // Konum izni verilmedi - forever
+    }else {
+      print("merhaba");
+      return await Geolocator.getCurrentPosition();
     }
-    return await Geolocator.getCurrentPosition();
+
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -56,6 +62,7 @@ class _DatePageState extends State<DatePage> {
               showModalBottomSheet(
                   context: context,
                   builder: (context) => Container(
+                    width: MediaQuery.of(context).size.width,
                         height: 400,
                         color: Colors.white,
                         child: Column(
@@ -74,6 +81,9 @@ class _DatePageState extends State<DatePage> {
                             SizedBox(
                               height: 10,
                             ),
+                            SizedBox(height: 30, width: MediaQuery.of(context).size.width / 1.2, child: SearchBar(
+                              //renk
+                            ),)
                           ],
                         ),
                       ));
@@ -82,7 +92,7 @@ class _DatePageState extends State<DatePage> {
               FontAwesomeIcons.search,
               color: Colors.black,
             )),
-        title: Text('Yer Seç',
+        title: Text('Gitmek İstediğin Yeri Seç',
             style: GoogleFonts.poppins(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -100,7 +110,12 @@ class _DatePageState extends State<DatePage> {
         ],
       ),
       body: GoogleMap(
-        mapType: MapType.hybrid,
+        padding: EdgeInsets.only(bottom: 10),
+        mapType: MapType.normal,
+        myLocationButtonEnabled: true,
+        myLocationEnabled: true,
+        zoomControlsEnabled: true,
+        zoomGesturesEnabled: true,
         initialCameraPosition: _kGooglePlex,
         onMapCreated: (GoogleMapController controller) {
           _controller.complete(controller);
