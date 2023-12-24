@@ -16,6 +16,7 @@ class DatePage extends StatefulWidget {
 }
 
 class _DatePageState extends State<DatePage> {
+  TextEditingController _searchController = TextEditingController();
   String locationMessage = "test";
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
@@ -23,7 +24,6 @@ class _DatePageState extends State<DatePage> {
     target: LatLng(39.933365, 32.859741),
     zoom: 14.4746,
   );
-
 
   Future<Position> _getCurrentLocation() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
@@ -33,16 +33,13 @@ class _DatePageState extends State<DatePage> {
 
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.deniedForever) {
-      return Future.error(
-          'Konum izni verilmedi - forever');
+      return Future.error('Konum izni verilmedi - forever');
       // Konum izni verilmedi - forever
-    }else {
+    } else {
       print("merhaba");
       return await Geolocator.getCurrentPosition();
     }
-
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +59,7 @@ class _DatePageState extends State<DatePage> {
               showModalBottomSheet(
                   context: context,
                   builder: (context) => Container(
-                    width: MediaQuery.of(context).size.width,
+                        width: MediaQuery.of(context).size.width,
                         height: 400,
                         color: Colors.white,
                         child: Column(
@@ -74,16 +71,24 @@ class _DatePageState extends State<DatePage> {
                               'Gitmek istediğiniz yeri seçin',
                               style: GoogleFonts.poppins(
                                 fontSize: 15,
-                                fontWeight: FontWeight.bold,
                                 color: Colors.black,
                               ),
                             ),
                             SizedBox(
-                              height: 10,
+                              height: 25,
                             ),
-                            SizedBox(height: 30, width: MediaQuery.of(context).size.width / 1.2, child: SearchBar(
-                              //renk
-                            ),)
+                            SizedBox(
+                              height: 50,
+                              width: MediaQuery.of(context).size.width / 1.2,
+                              child: SearchBar(
+                                leading: FaIcon(
+                                  FontAwesomeIcons.search,
+                                  color: Colors.black,
+                                ),
+                                hintText: 'Nereye gitmek istiyorsunuz?',
+                                controller: _searchController,
+                              ),
+                            )
                           ],
                         ),
                       ));
