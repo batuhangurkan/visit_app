@@ -59,22 +59,7 @@ class _ProfilePageState extends State<ProfilePage> {
               SizedBox(
                 height: 10,
               ),
-              Center(
-                child: Text(
-                  user!.displayName.toString(),
-                  style: GoogleFonts.poppins(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black),
-                ),
-              ),
-              Center(
-                child: Text(
-                  user!.email.toString(),
-                  style: GoogleFonts.poppins(
-                      fontSize: 15, color: Colors.grey[500]),
-                ),
-              ),
+
               SizedBox(
                 height: 10,
               ),

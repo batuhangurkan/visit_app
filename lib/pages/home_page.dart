@@ -1,4 +1,6 @@
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:elegant_notification/elegant_notification.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +25,9 @@ class _HomePageState extends State<HomePage> {
 
   Stream<QuerySnapshot<Map<String, dynamic>>> snapshot =
       FirebaseFirestore.instance.collection("Location").snapshots();
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +60,7 @@ class _HomePageState extends State<HomePage> {
                   context: context,
                   builder: (context) => Container(
                         width: MediaQuery.of(context).size.width,
-                        height: 200,
+                        height: 75,
                         color: Colors.white,
                         child: Column(
                           children: [
@@ -77,28 +82,7 @@ class _HomePageState extends State<HomePage> {
                                     context, '/login', (route) => false);
                               },
                             ),
-                            ListTile(
-                              leading: Icon(
-                                FontAwesomeIcons.trash,
-                                color: Colors.red,
-                              ),
-                              title: Text(
-                                'Hesabını Sil',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 15,
-                                  color: Colors.red,
-                                ),
-                              ),
-                              onTap: () {
-                                FirebaseFirestore.instance
-                                    .collection('Person')
-                                    .doc(user!.uid)
-                                    .delete();
-                                currentUser.signOut();
-                                Navigator.pushNamedAndRemoveUntil(
-                                    context, '/login', (route) => false);
-                              },
-                            ),
+
                           ],
                         ),
                       ));
@@ -110,122 +94,80 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           children: [
             SizedBox(
-              height: 20,
-            ),
-            Row(
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    "Merhaba" + ", " + '\n' + user!.displayName.toString(),
-                    style: GoogleFonts.poppins(
-                        color: Colors.black,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold),
-                  ),
-                )
-              ],
-            ),
-            SizedBox(
-              height: 20,
-            ),
-            GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onTap: () {
-                Navigator.pushNamedAndRemoveUntil(
-                    context, '/profilepage', (route) => true);
-              },
-              child: Container(
-                width: MediaQuery.of(context).size.width / 1.1,
-                height: 125,
-                decoration: BoxDecoration(
-                    color: Colors.green[600],
-                    borderRadius: BorderRadius.circular(20)),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Gideceğim Yerler",
-                      style: GoogleFonts.poppins(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20),
-                    )
-                  ],
-                ),
+              width: MediaQuery.of(context).size.width / 1.0,
+              child: Divider(
+                height: 1,
+                color: Colors.black,
               ),
             ),
-            SizedBox(
-              height: 15,
+            SizedBox(height: 10,),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(children: [
+                Text("Kategori Seç", style: GoogleFonts.poppins(color: Colors.black, fontWeight: FontWeight.bold),)
+              ],),
             ),
-            GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onTap: () {
-                Navigator.pushNamedAndRemoveUntil(
-                    context, '/profilepage', (route) => true);
-              },
-              child: Container(
-                width: MediaQuery.of(context).size.width / 1.1,
-                height: 125,
-                decoration: BoxDecoration(
-                    color: Colors.green[600],
-                    borderRadius: BorderRadius.circular(20)),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Gitmiş Olduğum Yerler",
-                      style: GoogleFonts.poppins(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20),
-                    )
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            Row(
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    "Son Gidilen Yerler",
-                    style: GoogleFonts.poppins(
-                        color: Colors.black,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold),
-                  ),
-                )
-              ],
-            ),
-            Expanded(
-              child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                builder: (context, snapshot) {
-                  final data = snapshot.data?.docs;
-                  if (ConnectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
-                  }
-                  if (!snapshot.hasData) {
-                    return Center(child: CircularProgressIndicator());
-                  }
-                  return Container(
-                    width: MediaQuery.of(context).size.width / 1.1,
-                    height: 200,
-                    decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20)),
-                    child: ListView.builder(
-                        itemCount: data!.length,
-                        itemBuilder: (context, index) {
-                          final location = data[index].data();
+            
+            StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+              builder: (context, snapshot) {
+                final data = snapshot.data?.docs;
+                if (ConnectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                }
+                if (!snapshot.hasData) {
+                  return Center(child: CircularProgressIndicator());
+                }
+                return Container(
+                  width: MediaQuery.of(context).size.width / 1.1,
+                  height: 200,
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20)),
+                  child: ListView.builder(
+                      itemCount: data!.length,
+                      itemBuilder: (context, index) {
+                        final location = data[index].data();
 
-                          var signupDate = user?.metadata.creationTime;
-                          return Column(
+
+                        return Dismissible(
+                          key: Key(location['locationName']),
+                          onDismissed: (direction) async {
+                            FirebaseFirestore.instance
+                                .collection('Location')
+                                .doc(data[index].id)
+                                .delete();
+                            ElegantNotification.success(
+                                progressIndicatorBackground: Colors.green,
+                                width:
+                                MediaQuery.of(context).size.width / 1,
+                                height: 100,
+                                title: Text("Başarılı!"),
+                                description: Text("Lokasyon silindi! "))
+                                .show(context);
+                          },
+                          background: Container(
+                            alignment: Alignment.centerRight,
+                            decoration: BoxDecoration(
+                              color: Colors.blue,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Icon(
+                              Icons.update,
+                              color: Colors.white,
+                            ),
+                          ),
+                          secondaryBackground: Container(
+                            alignment: Alignment.centerLeft,
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Icon(
+                              Icons.delete,
+                              color: Colors.white,
+                            ),
+                          ),
+                          child: Column(
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -247,15 +189,15 @@ class _HomePageState extends State<HomePage> {
                                     )),
                               ),
                             ],
-                          );
-                        }),
-                  );
-                },
-                stream: FirebaseFirestore.instance
-                    .collection("Location")
-                    .snapshots(),
-              ),
-            )
+                          ),
+                        );
+                      }),
+                );
+              },
+              stream:
+              FirebaseFirestore.instance.collection("Location").snapshots(),
+            ),
+
           ],
         ),
       ),

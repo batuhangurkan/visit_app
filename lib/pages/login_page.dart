@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:elegant_notification/elegant_notification.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +9,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:myapp1/pages/bottomnavigationbar.dart';
 import 'package:myapp1/pages/home_page.dart';
 import 'package:myapp1/pages/register_page.dart';
+import 'package:sign_button/constants.dart';
+import 'package:sign_button/create_button.dart';
+import 'package:sn_progress_dialog/sn_progress_dialog.dart';
 import '../services/auth.dart';
 import 'flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -24,6 +28,23 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController _emailcontroller = TextEditingController();
   TextEditingController _passwordcontroller = TextEditingController();
   AuthService _authService = AuthService();
+
+  // progress bar
+  _onlyMessageProgress(context) async {
+    ProgressDialog pd = ProgressDialog(context: context);
+    pd.show(
+      barrierDismissible: true,
+      msg: "Giriş bilgileriniz alınıyor...",
+      hideValue: true,
+    );
+
+    /** You can update the message value after a certain action **/
+    await Future.delayed(Duration(milliseconds: 1000));
+    pd.update(msg: "Uygulamaya Giriliyor....");
+
+    await Future.delayed(Duration(milliseconds: 1000));
+    pd.close();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,169 +66,138 @@ class _LoginPageState extends State<LoginPage> {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   width: MediaQuery.of(context).size.width / 1.2,
-                  height: 200,
+                  height: 150,
                   child: Image.asset(
                     'assets/images/logo.png',
                   ),
                 ),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
+                Center(
+                  child: Text(
+                    "Hoşgeldin,",
+                    style: GoogleFonts.poppins(
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black),
                   ),
+                ),
+              SizedBox(height: 5,),
+              Text("Kullanıcını seçerek giriş yapabilirsin!", style: GoogleFonts.poppins(color: Colors.grey, fontWeight: FontWeight.bold, fontStyle: FontStyle.italic),),
+
+                StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                  builder: (context, snapshot) {
+                    final data = snapshot.data?.docs;
+                    if (ConnectionState == ConnectionState.waiting) {
+                      return Center(child: CircularProgressIndicator());
+                    }
+                    if (!snapshot.hasData) {
+                      return Center(child: CircularProgressIndicator());
+                    }
+                    return Container(
+                      width: MediaQuery.of(context).size.width / 1.1,
+                      height: 200,
+                      decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20)),
+                      child: ListView.builder(
+                          itemCount: data!.length,
+                          itemBuilder: (context, index) {
+                            final person = data[index].data();
+
+                            var signupDate = user?.metadata.creationTime;
+                            return Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                ListTile(
+                                  title: Text(
+                                    person['displayName'],
+                                    style: GoogleFonts.poppins(
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  subtitle: Text(person['email'],
+                                      style: GoogleFonts.poppins(
+                                          color: Colors.grey,
+                                          fontWeight: FontWeight.bold)),
+                                  trailing: GestureDetector(
+                                      onTap: () {
+                                        _onlyMessageProgress(context);
+                                        Future.delayed(const Duration(seconds: 3), () {
+
+// Here you can write your code
+
+                                          setState(() {
+
+                                            Navigator.pushNamedAndRemoveUntil(context, '/bottomnavigationbar', (route) => false);
+                                          });
+
+                                        });
+
+
+
+                                      },
+                                      child: FaIcon(
+                                        FontAwesomeIcons.locationArrow,
+                                        color: Colors.green,
+                                      )),
+                                  leading: CircleAvatar(backgroundImage: AssetImage(('assets/images/woman.png'),), radius:20,),
+                                ),
+                              ],
+                            );
+                          }),
+                    );
+                  },
+                  stream: FirebaseFirestore.instance
+                      .collection("Person")
+                      .snapshots(),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Row(
+                      children: <Widget>[
+                        Expanded(
+                            child: Divider(
+                              height: 2,
+                              color: Colors.grey,
+                            )
+                        ),
+
+                        Text("Bunları Dene", style: GoogleFonts.poppins(color: Colors.grey, fontWeight: FontWeight.bold),),
+
+                        Expanded(
+                            child: Divider(
+                              height: 2,
+                              color: Colors.grey,
+                            )
+                        ),
+                      ]
+                  ),
+                ),
+
+                SizedBox(
                   width: MediaQuery.of(context).size.width / 1.2,
-                  height: 100,
-                  child: Center(
-                    child: Text(
-                      'Giriş Yapın',
-                      style: GoogleFonts.poppins(
-                          fontSize: 30,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black),
-                    ),
-                  ),
+                  child: SignInButton(
+                      buttonType: ButtonType.google,
+                      onPressed: () {
+                        print('click');
+                      })
                 ),
                 SizedBox(
-                  height: 15,
+                    width: MediaQuery.of(context).size.width / 1.2,
+                    child: SignInButton(
+                        buttonType: ButtonType.githubDark,
+                        onPressed: () {
+                          print('click');
+                        })
                 ),
-                Form(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        width: MediaQuery.of(context).size.width / 1.2,
-                        height: 75,
-                        child: TextFormField(
-                          controller: _emailcontroller,
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: Colors.grey[200],
-                            hintText: 'E-mail',
-                            prefixIcon: Icon(Icons.mail),
-                            hintStyle: GoogleFonts.poppins(
-                                fontSize: 15, color: Colors.black87),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        height: 30,
-                      ),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        width: MediaQuery.of(context).size.width / 1.2,
-                        height: 75,
-                        child: TextFormField(
-                          controller: _passwordcontroller,
-                          decoration: InputDecoration(
-                            prefixIcon: Icon(Icons.lock),
-                            filled: true,
-                            fillColor: Colors.grey[200],
-                            hintText: 'Şifre',
-                            hintStyle: GoogleFonts.poppins(
-                                fontSize: 15, color: Colors.black),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                          ),
-                        ),
-                      ),
-                      InkWell(
-                        child: Padding(
-                            padding: EdgeInsets.fromLTRB(200, 0, 0, 25),
-                            child: Text("Şifremi Unuttum",
-                                style: GoogleFonts.poppins(
-                                    fontSize: 15,
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.normal,
-                                    decoration: TextDecoration.underline))),
-                        onTap: () {
-                          //şifremi sıfırla
-                          Navigator.of(context).pushNamedAndRemoveUntil(
-                              '/resetpasswordpage',
-                              (Route<dynamic> route) => true);
-                        },
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      SizedBox(
-                        height: 50,
-                        width: MediaQuery.of(context).size.width / 1.5,
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            if (_emailcontroller.text.isNotEmpty &&
-                                _passwordcontroller.text.isNotEmpty) {
-                              setState(() async {
-                                await _authService
-                                    .signIn(_emailcontroller.text,
-                                        _passwordcontroller.text)
-                                    .then((value) => Navigator.of(context)
-                                        .pushNamedAndRemoveUntil(
-                                            '/bottomnavigationbar',
-                                            (Route<dynamic> route) => false));
-                              });
-                            } else {
-                              ElegantNotification.error(
-                                      progressIndicatorBackground: Colors.red,
-                                      width:
-                                          MediaQuery.of(context).size.width / 1,
-                                      height: 100,
-                                      title: Text("Hata!"),
-                                      description: Text(
-                                          "Giriş bilgilerinizi kontrol ediniz."))
-                                  .show(context);
-                            }
-                          },
-                          child: Text('Giriş Yap',
-                              style: GoogleFonts.poppins(fontSize: 15)),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green[600],
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      InkWell(
-                          onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => RegisterPage()));
-                          },
-                          child: Container(
-                            margin: EdgeInsets.only(top: 40),
-                            child: RichText(
-                                text: TextSpan(
-                                    text: "Hesabınız yok mu? ",
-                                    style: GoogleFonts.poppins(
-                                        color: Colors.black, fontSize: 15),
-                                    children: [
-                                  TextSpan(
-                                      text: "Kayıt Olun",
-                                      style: TextStyle(
-                                          color: Colors.blueAccent[200],
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.bold))
-                                ])),
-                          )),
-                    ],
-                  ),
-                )
+                SizedBox(
+                    width: MediaQuery.of(context).size.width / 1.2,
+                    child: SignInButton(
+                      buttonSize: ButtonSize.small,
+                        buttonType: ButtonType.discord,
+                        onPressed: () {
+                          print('click');
+                        })
+                ),
               ],
             ),
           ))),
