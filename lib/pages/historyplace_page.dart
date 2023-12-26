@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:myapp1/services/firebase_service.dart';
+import 'package:sn_progress_dialog/progress_dialog.dart';
 
 class HistoryPlace extends StatefulWidget {
   const HistoryPlace({super.key});
@@ -15,8 +16,27 @@ class HistoryPlace extends StatefulWidget {
 class _HistoryPlaceState extends State<HistoryPlace> {
   TextEditingController _locationNameController = TextEditingController();
   TextEditingController _locationTimeController = TextEditingController();
+  TextEditingController _categoryController = TextEditingController();
   CollectionReference locationadd =
       FirebaseFirestore.instance.collection('Location');
+
+  List<String> categoryList = ['Yemek', 'Tatlı'];
+
+  _onlyMessageProgress(context) async {
+    ProgressDialog pd = ProgressDialog(context: context);
+    pd.show(
+        barrierDismissible: true,
+        msg: "Harita bilgileri alınıyor...",
+        hideValue: true,
+        backgroundColor: Colors.white);
+
+    /** You can update the message value after a certain action **/
+    await Future.delayed(Duration(milliseconds: 1000));
+    pd.update(msg: "Haritada işaretleniyor....");
+
+    await Future.delayed(Duration(milliseconds: 1000));
+    pd.close();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +69,7 @@ class _HistoryPlaceState extends State<HistoryPlace> {
                   context: context,
                   builder: (context) => Container(
                         width: MediaQuery.of(context).size.width,
-                        height: 400,
+                        height: 600,
                         color: Colors.white,
                         child: Column(
                           children: [
@@ -57,9 +77,10 @@ class _HistoryPlaceState extends State<HistoryPlace> {
                               height: 15,
                             ),
                             Text(
-                              'Yer Ekleyin',
+                              'Gezilecek bir yer ekleyin!',
                               style: GoogleFonts.poppins(
                                 fontSize: 15,
+                                fontWeight: FontWeight.bold,
                                 color: Colors.black,
                               ),
                             ),
@@ -128,55 +149,96 @@ class _HistoryPlaceState extends State<HistoryPlace> {
                                 ),
                               ),
                             ),
-                            ElevatedButton(
-                              onPressed: () async {
-                                if (_locationNameController.text.isNotEmpty &&
-                                    _locationTimeController.text.isNotEmpty) {
-                                  await FirebaseService().insertLocation(
-                                      locationName:
-                                          _locationNameController.text,
-                                      locationTime:
-                                          _locationTimeController.text);
-                                  ElegantNotification.success(
-                                          progressIndicatorBackground:
-                                              Colors.green,
-                                          width: MediaQuery.of(context)
-                                                  .size
-                                                  .width /
-                                              1,
-                                          height: 100,
-                                          title: Text("Başarılı!"),
-                                          description:
-                                              Text("Lokasyon eklendi! "))
-                                      .show(context);
-
-                                  _locationNameController.clear();
-                                  _locationTimeController.clear();
-                                } else {
-                                  ElegantNotification.error(
-                                          progressIndicatorBackground:
-                                              Colors.red,
-                                          width: MediaQuery.of(context)
-                                                  .size
-                                                  .width /
-                                              1,
-                                          height: 100,
-                                          title: Text("Hata!"),
-                                          description:
-                                              Text("Bilger boş olamaz! "))
-                                      .show(context);
-                                }
-                              },
-                              child: Text('Ekle',
-                                  style: GoogleFonts.poppins(fontSize: 15)),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.green[600],
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              width: MediaQuery.of(context).size.width / 1.2,
+                              height: 75,
+                              child: TextFormField(
+                                keyboardType: TextInputType.text,
+                                controller: _categoryController,
+                                decoration: InputDecoration(
+                                  prefixIcon: Icon(Icons.category),
+                                  filled: true,
+                                  fillColor: Colors.grey[200],
+                                  hoverColor: Colors.green[600],
+                                  hintText: 'Kategori seçin!',
+                                  hintStyle: GoogleFonts.poppins(
+                                      fontSize: 15, color: Colors.black),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
                                 ),
                               ),
                             ),
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width / 1.3,
+                              child: ElevatedButton(
+                                onPressed: () async {
+                                  if (_locationNameController.text.isNotEmpty &&
+                                      _locationTimeController.text.isNotEmpty &&
+                                      _categoryController.text.isNotEmpty) {
+                                    await FirebaseService().insertLocation(
+                                        locationName:
+                                            _locationNameController.text,
+                                        locationTime:
+                                            _locationTimeController.text,
+                                        category: _categoryController.text);
+
+                                    ElegantNotification.success(
+                                            progressIndicatorBackground:
+                                                Colors.green,
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width /
+                                                1,
+                                            height: 100,
+                                            title: Text("Başarılı!"),
+                                            description:
+                                                Text("Lokasyon eklendi! "))
+                                        .show(context);
+
+                                    _locationNameController.clear();
+                                    _locationTimeController.clear();
+                                    _categoryController.clear();
+                                  } else {
+                                    ElegantNotification.error(
+                                            progressIndicatorBackground:
+                                                Colors.red,
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width /
+                                                1,
+                                            height: 100,
+                                            title: Text("Hata!"),
+                                            description: Text(
+                                                "Bilgilerinizi kontrol ediniz!"))
+                                        .show(context);
+                                  }
+                                },
+                                child: Text('Ekle',
+                                    style: GoogleFonts.poppins(fontSize: 15)),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.green[600],
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Text('Kategoriler:'),
+                            Text(
+                              'Yemek' + ' ' + 'Tatlı',
+                              style: GoogleFonts.poppins(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.bold),
+                            )
                           ],
                         ),
                       ));
@@ -260,11 +322,25 @@ class _HistoryPlaceState extends State<HistoryPlace> {
                                         color: Colors.grey,
                                         fontWeight: FontWeight.bold)),
                                 trailing: GestureDetector(
-                                    onTap: () {},
+                                    onTap: () {
+                                      _onlyMessageProgress(context);
+                                    },
                                     child: FaIcon(
                                       FontAwesomeIcons.locationArrow,
                                       color: Colors.green,
                                     )),
+                                leading: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      location['category'],
+                                      style: GoogleFonts.poppins(
+                                          color: Colors.red,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ],
                           ),

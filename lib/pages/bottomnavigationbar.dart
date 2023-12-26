@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:myapp1/pages/date_page.dart';
 import 'package:myapp1/pages/home_page.dart';
-import 'package:myapp1/pages/profile_page.dart';
 
 import 'historyplace_page.dart';
 
@@ -22,7 +21,6 @@ class _BottomNavigationBarPageState extends State<BottomNavigationBarPage> {
     HomePage(),
     DatePage(),
     HistoryPlace(),
-    ProfilePage(),
   ];
   @override
   Widget build(BuildContext context) {
@@ -36,7 +34,6 @@ class _BottomNavigationBarPageState extends State<BottomNavigationBarPage> {
             BottomNavigationBarItem(
                 icon: FaIcon(FontAwesomeIcons.locationArrow)),
             BottomNavigationBarItem(icon: FaIcon(FontAwesomeIcons.mapLocation)),
-            BottomNavigationBarItem(icon: FaIcon(FontAwesomeIcons.user)),
           ],
           currentIndex: currentIndex,
           onTap: (index) {

@@ -1,14 +1,14 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:elegant_notification/elegant_notification.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:myapp1/pages/profile_page.dart';
 import 'package:myapp1/services/auth.dart';
+import 'package:sn_progress_dialog/progress_dialog.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -26,8 +26,23 @@ class _HomePageState extends State<HomePage> {
   Stream<QuerySnapshot<Map<String, dynamic>>> snapshot =
       FirebaseFirestore.instance.collection("Location").snapshots();
 
+  //progress bar
 
+  _onlyMessageProgress(context) async {
+    ProgressDialog pd = ProgressDialog(context: context);
+    pd.show(
+      barrierDismissible: true,
+      msg: "Giriş bilgileriniz alınıyor...",
+      hideValue: true,
+    );
 
+    /** You can update the message value after a certain action **/
+    await Future.delayed(Duration(milliseconds: 1000));
+    pd.update(msg: "Uygulamaya Giriliyor....");
+
+    await Future.delayed(Duration(milliseconds: 1000));
+    pd.close();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +97,6 @@ class _HomePageState extends State<HomePage> {
                                     context, '/login', (route) => false);
                               },
                             ),
-
                           ],
                         ),
                       ));
@@ -94,110 +108,22 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           children: [
             SizedBox(
-              width: MediaQuery.of(context).size.width / 1.0,
-              child: Divider(
-                height: 1,
-                color: Colors.black,
-              ),
+              height: 10,
             ),
-            SizedBox(height: 10,),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Row(children: [
-                Text("Kategori Seç", style: GoogleFonts.poppins(color: Colors.black, fontWeight: FontWeight.bold),)
-              ],),
+              child: Row(
+                children: [
+                  Text(
+                    "Kategori Seç",
+                    style: GoogleFonts.poppins(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20),
+                  ),
+                ],
+              ),
             ),
-            
-            StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-              builder: (context, snapshot) {
-                final data = snapshot.data?.docs;
-                if (ConnectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                }
-                if (!snapshot.hasData) {
-                  return Center(child: CircularProgressIndicator());
-                }
-                return Container(
-                  width: MediaQuery.of(context).size.width / 1.1,
-                  height: 200,
-                  decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20)),
-                  child: ListView.builder(
-                      itemCount: data!.length,
-                      itemBuilder: (context, index) {
-                        final location = data[index].data();
-
-
-                        return Dismissible(
-                          key: Key(location['locationName']),
-                          onDismissed: (direction) async {
-                            FirebaseFirestore.instance
-                                .collection('Location')
-                                .doc(data[index].id)
-                                .delete();
-                            ElegantNotification.success(
-                                progressIndicatorBackground: Colors.green,
-                                width:
-                                MediaQuery.of(context).size.width / 1,
-                                height: 100,
-                                title: Text("Başarılı!"),
-                                description: Text("Lokasyon silindi! "))
-                                .show(context);
-                          },
-                          background: Container(
-                            alignment: Alignment.centerRight,
-                            decoration: BoxDecoration(
-                              color: Colors.blue,
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Icon(
-                              Icons.update,
-                              color: Colors.white,
-                            ),
-                          ),
-                          secondaryBackground: Container(
-                            alignment: Alignment.centerLeft,
-                            decoration: BoxDecoration(
-                              color: Colors.red,
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Icon(
-                              Icons.delete,
-                              color: Colors.white,
-                            ),
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              ListTile(
-                                title: Text(
-                                  location['locationName'],
-                                  style: GoogleFonts.poppins(
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                subtitle: Text(location['locationTime'],
-                                    style: GoogleFonts.poppins(
-                                        color: Colors.grey,
-                                        fontWeight: FontWeight.bold)),
-                                trailing: GestureDetector(
-                                    onTap: () {},
-                                    child: FaIcon(
-                                      FontAwesomeIcons.locationArrow,
-                                      color: Colors.green,
-                                    )),
-                              ),
-                            ],
-                          ),
-                        );
-                      }),
-                );
-              },
-              stream:
-              FirebaseFirestore.instance.collection("Location").snapshots(),
-            ),
-
           ],
         ),
       ),

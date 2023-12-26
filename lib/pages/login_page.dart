@@ -45,6 +45,7 @@ class _LoginPageState extends State<LoginPage> {
     await Future.delayed(Duration(milliseconds: 1000));
     pd.close();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -80,9 +81,16 @@ class _LoginPageState extends State<LoginPage> {
                         color: Colors.black),
                   ),
                 ),
-              SizedBox(height: 5,),
-              Text("Kullanıcını seçerek giriş yapabilirsin!", style: GoogleFonts.poppins(color: Colors.grey, fontWeight: FontWeight.bold, fontStyle: FontStyle.italic),),
-
+                SizedBox(
+                  height: 5,
+                ),
+                Text(
+                  "Kullanıcını seçerek giriş yapabilirsin!",
+                  style: GoogleFonts.poppins(
+                      color: Colors.grey,
+                      fontWeight: FontWeight.bold,
+                      fontStyle: FontStyle.italic),
+                ),
                 StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                   builder: (context, snapshot) {
                     final data = snapshot.data?.docs;
@@ -121,25 +129,28 @@ class _LoginPageState extends State<LoginPage> {
                                   trailing: GestureDetector(
                                       onTap: () {
                                         _onlyMessageProgress(context);
-                                        Future.delayed(const Duration(seconds: 3), () {
-
+                                        Future.delayed(
+                                            const Duration(seconds: 3), () {
 // Here you can write your code
 
                                           setState(() {
-
-                                            Navigator.pushNamedAndRemoveUntil(context, '/bottomnavigationbar', (route) => false);
+                                            Navigator.pushNamedAndRemoveUntil(
+                                                context,
+                                                '/bottomnavigationbar',
+                                                (route) => false);
                                           });
-
                                         });
-
-
-
                                       },
                                       child: FaIcon(
                                         FontAwesomeIcons.locationArrow,
                                         color: Colors.green,
                                       )),
-                                  leading: CircleAvatar(backgroundImage: AssetImage(('assets/images/woman.png'),), radius:20,),
+                                  leading: CircleAvatar(
+                                    backgroundImage: AssetImage(
+                                      ('assets/images/logo.png'),
+                                    ),
+                                    radius: 20,
+                                  ),
                                 ),
                               ],
                             );
@@ -152,52 +163,46 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 Padding(
                   padding: const EdgeInsets.all(12.0),
-                  child: Row(
-                      children: <Widget>[
-                        Expanded(
-                            child: Divider(
-                              height: 2,
-                              color: Colors.grey,
-                            )
-                        ),
-
-                        Text("Bunları Dene", style: GoogleFonts.poppins(color: Colors.grey, fontWeight: FontWeight.bold),),
-
-                        Expanded(
-                            child: Divider(
-                              height: 2,
-                              color: Colors.grey,
-                            )
-                        ),
-                      ]
-                  ),
+                  child: Row(children: <Widget>[
+                    Expanded(
+                        child: Divider(
+                      height: 2,
+                      color: Colors.grey,
+                    )),
+                    Text(
+                      "Bunları Dene",
+                      style: GoogleFonts.poppins(
+                          color: Colors.grey, fontWeight: FontWeight.bold),
+                    ),
+                    Expanded(
+                        child: Divider(
+                      height: 2,
+                      color: Colors.grey,
+                    )),
+                  ]),
                 ),
-
                 SizedBox(
-                  width: MediaQuery.of(context).size.width / 1.2,
-                  child: SignInButton(
-                      buttonType: ButtonType.google,
-                      onPressed: () {
-                        print('click');
-                      })
-                ),
+                    width: MediaQuery.of(context).size.width / 1.2,
+                    child: SignInButton(
+                        buttonType: ButtonType.google,
+                        onPressed: () {
+                          print('click');
+                        })),
                 SizedBox(
                     width: MediaQuery.of(context).size.width / 1.2,
                     child: SignInButton(
                         buttonType: ButtonType.githubDark,
                         onPressed: () {
                           print('click');
-                        })
-                ),
+                        })),
                 SizedBox(
                     width: MediaQuery.of(context).size.width / 1.2,
                     child: SignInButton(
-                      buttonSize: ButtonSize.small,
+                        buttonSize: ButtonSize.small,
                         buttonType: ButtonType.discord,
                         onPressed: () {
                           print('click');
-                        })
-                ),
+                        })),
               ],
             ),
           ))),
