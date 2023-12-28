@@ -1,11 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:elegant_notification/elegant_notification.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:myapp1/services/firebase_service.dart';
 import 'package:sn_progress_dialog/progress_dialog.dart';
-import 'package:location/location.dart';
 
 class HistoryPlace extends StatefulWidget {
   const HistoryPlace({super.key});
@@ -18,6 +20,7 @@ class _HistoryPlaceState extends State<HistoryPlace> {
   TextEditingController _locationNameController = TextEditingController();
   TextEditingController _locationTimeController = TextEditingController();
   TextEditingController _categoryController = TextEditingController();
+  TextEditingController _adressController = TextEditingController();
   CollectionReference locationadd =
       FirebaseFirestore.instance.collection('Location');
 
@@ -37,6 +40,65 @@ class _HistoryPlaceState extends State<HistoryPlace> {
 
     await Future.delayed(Duration(milliseconds: 1000));
     pd.close();
+  }
+
+  String? _currentAddress;
+  Position? _currentPosition;
+
+  Future<bool> _handleLocationPermission() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text(
+              'Location services are disabled. Please enable the services')));
+      return false;
+    }
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Location permissions are denied')));
+        return false;
+      }
+    }
+    if (permission == LocationPermission.deniedForever) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text(
+              'Location permissions are permanently denied, we cannot request permissions.')));
+      return false;
+    }
+    return true;
+  }
+
+  Future<void> _getCurrentPosition() async {
+    final hasPermission = await _handleLocationPermission();
+
+    if (!hasPermission) return;
+    await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high)
+        .then((Position position) {
+      setState(() => _currentPosition = position);
+      _getAddressFromLatLng(_currentPosition!);
+    }).catchError((e) {
+      debugPrint(e);
+    });
+  }
+
+  Future<void> _getAddressFromLatLng(Position position) async {
+    await placemarkFromCoordinates(
+            _currentPosition!.latitude, _currentPosition!.longitude)
+        .then((List<Placemark> placemarks) {
+      Placemark place = placemarks[0];
+      setState(() {
+        _currentAddress =
+            '${place.street}, ${place.subLocality}, ${place.subAdministrativeArea}, ${place.postalCode}';
+      });
+    }).catchError((e) {
+      debugPrint(e);
+    });
   }
 
   @override
@@ -66,11 +128,12 @@ class _HistoryPlaceState extends State<HistoryPlace> {
               color: Colors.black,
             ),
             onPressed: () {
-              showModalBottomSheet(
+              showModalBottomSheet<void>(
+                  isScrollControlled: true,
                   context: context,
                   builder: (context) => Container(
                         width: MediaQuery.of(context).size.width,
-                        height: MediaQuery.of(context).size.height,
+                        height: 600,
                         color: Colors.white,
                         child: Column(
                           children: [
@@ -160,15 +223,53 @@ class _HistoryPlaceState extends State<HistoryPlace> {
                               ),
                               width: MediaQuery.of(context).size.width / 1.2,
                               height: 75,
-                              child: TextFormField(
-                                keyboardType: TextInputType.text,
-                                controller: _categoryController,
+                              child: DropdownButtonFormField(
                                 decoration: InputDecoration(
                                   prefixIcon: Icon(Icons.category),
                                   filled: true,
                                   fillColor: Colors.grey[200],
                                   hoverColor: Colors.green[600],
-                                  hintText: 'Kategori seçin!',
+                                  hintText: 'Kategori Seçin',
+                                  hintStyle: GoogleFonts.poppins(
+                                      fontSize: 15, color: Colors.black),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                ),
+                                value: _categoryController.text.isEmpty
+                                    ? null
+                                    : _categoryController.text,
+                                items: categoryList.map((category) {
+                                  return DropdownMenuItem(
+                                    value: category,
+                                    child: Text(category),
+                                  );
+                                }).toList(),
+                                onChanged: (value) {
+                                  setState(() {
+                                    _categoryController.text = value.toString();
+                                  });
+                                },
+                              ),
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              width: MediaQuery.of(context).size.width / 1.2,
+                              height: 75,
+                              child: TextFormField(
+                                controller: _adressController,
+                                decoration: InputDecoration(
+                                  prefixIcon: Icon(Icons.location_city),
+                                  filled: true,
+                                  fillColor: Colors.grey[200],
+                                  hoverColor: Colors.green[600],
+                                  hintText: 'Adres Bilgisi',
                                   hintStyle: GoogleFonts.poppins(
                                       fontSize: 15, color: Colors.black),
                                   border: OutlineInputBorder(
@@ -189,7 +290,8 @@ class _HistoryPlaceState extends State<HistoryPlace> {
                                             _locationNameController.text,
                                         locationTime:
                                             _locationTimeController.text,
-                                        category: _categoryController.text);
+                                        category: _categoryController.text,
+                                        adress: _adressController.text);
 
                                     ElegantNotification.success(
                                             progressIndicatorBackground:
@@ -223,7 +325,9 @@ class _HistoryPlaceState extends State<HistoryPlace> {
                                   }
                                 },
                                 child: Text('Ekle',
-                                    style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.bold)),
+                                    style: GoogleFonts.poppins(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold)),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.green[600],
                                   foregroundColor: Colors.white,
@@ -236,23 +340,28 @@ class _HistoryPlaceState extends State<HistoryPlace> {
                             SizedBox(
                               width: MediaQuery.of(context).size.width / 1.3,
                               child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent),
+                                style: ElevatedButton.styleFrom(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    backgroundColor: Colors.blueAccent),
                                 onPressed: () async {
+                                  print(_getCurrentPosition());
 
                                   setState(() {
-
-
+                                    _handleLocationPermission();
+                                    _adressController.text =
+                                        _currentAddress.toString();
                                   });
-                                }, child: Text('Lokasyon bilgimi çek', style: GoogleFonts.poppins(color: Colors.white, fontWeight: FontWeight.bold),),
+                                },
+                                child: Text(
+                                  'Lokasyon bilgimi çek',
+                                  style: GoogleFonts.poppins(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold),
+                                ),
                               ),
                             ),
-                            Text('Kategoriler:'),
-                            Text(
-                              'Yemek' + ' ' + 'Tatlı',
-                              style: GoogleFonts.poppins(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.bold),
-                            )
                           ],
                         ),
                       ));
@@ -331,7 +440,7 @@ class _HistoryPlaceState extends State<HistoryPlace> {
                                   style: GoogleFonts.poppins(
                                       fontWeight: FontWeight.bold),
                                 ),
-                                subtitle: Text(location['locationTime'],
+                                subtitle: Text(location['adress'],
                                     style: GoogleFonts.poppins(
                                         color: Colors.grey,
                                         fontWeight: FontWeight.bold)),
