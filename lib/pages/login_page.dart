@@ -188,6 +188,7 @@ class _LoginPageState extends State<LoginPage> {
                         onPressed: () {
                           print('click');
                         })),
+                SizedBox(height: 10,),
                 SizedBox(
                     width: MediaQuery.of(context).size.width / 1.2,
                     child: SignInButton(
@@ -195,6 +196,7 @@ class _LoginPageState extends State<LoginPage> {
                         onPressed: () {
                           print('click');
                         })),
+                SizedBox(height: 10,),
                 SizedBox(
                     width: MediaQuery.of(context).size.width / 1.2,
                     child: SignInButton(

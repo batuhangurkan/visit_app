@@ -5,6 +5,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:myapp1/services/firebase_service.dart';
 import 'package:sn_progress_dialog/progress_dialog.dart';
+import 'package:location/location.dart';
 
 class HistoryPlace extends StatefulWidget {
   const HistoryPlace({super.key});
@@ -69,7 +70,7 @@ class _HistoryPlaceState extends State<HistoryPlace> {
                   context: context,
                   builder: (context) => Container(
                         width: MediaQuery.of(context).size.width,
-                        height: 600,
+                        height: MediaQuery.of(context).size.height,
                         color: Colors.white,
                         child: Column(
                           children: [
@@ -222,7 +223,7 @@ class _HistoryPlaceState extends State<HistoryPlace> {
                                   }
                                 },
                                 child: Text('Ekle',
-                                    style: GoogleFonts.poppins(fontSize: 15)),
+                                    style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.bold)),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.green[600],
                                   foregroundColor: Colors.white,
@@ -230,6 +231,19 @@ class _HistoryPlaceState extends State<HistoryPlace> {
                                     borderRadius: BorderRadius.circular(20),
                                   ),
                                 ),
+                              ),
+                            ),
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width / 1.3,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent),
+                                onPressed: () async {
+
+                                  setState(() {
+
+
+                                  });
+                                }, child: Text('Lokasyon bilgimi çek', style: GoogleFonts.poppins(color: Colors.white, fontWeight: FontWeight.bold),),
                               ),
                             ),
                             Text('Kategoriler:'),
