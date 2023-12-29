@@ -42,6 +42,22 @@ class _HistoryPlaceState extends State<HistoryPlace> {
     pd.close();
   }
 
+  getLocationProgress(context) async {
+    ProgressDialog pd = ProgressDialog(context: context);
+    pd.show(
+        barrierDismissible: false,
+        msg: "Lokasyon bilgisi alınıyor.",
+        hideValue: true,
+        backgroundColor: Colors.white);
+
+    /** You can update the message value after a certain action **/
+    await Future.delayed(Duration(milliseconds: 1000));
+    pd.update(msg: "Bu işlem biraz uzun sürebilir!");
+
+    await Future.delayed(Duration(milliseconds: 1000));
+    pd.close();
+  }
+
   String? _currentAddress;
   Position? _currentPosition;
 
@@ -347,6 +363,7 @@ class _HistoryPlaceState extends State<HistoryPlace> {
                                     backgroundColor: Colors.blueAccent),
                                 onPressed: () async {
                                   print(_getCurrentPosition());
+                                  getLocationProgress(context);
 
                                   setState(() {
                                     _handleLocationPermission();
