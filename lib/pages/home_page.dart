@@ -9,6 +9,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:myapp1/services/auth.dart';
 import 'package:sn_progress_dialog/progress_dialog.dart';
+import 'package:theme_manager/theme_manager.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -22,7 +23,6 @@ class _HomePageState extends State<HomePage> {
   AuthService _authService = AuthService();
   User? user = FirebaseAuth.instance.currentUser;
   final currentUser = FirebaseAuth.instance;
-
   Stream<QuerySnapshot<Map<String, dynamic>>> snapshot =
       FirebaseFirestore.instance.collection("Location").snapshots();
 
@@ -46,6 +46,26 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    _shuffleButton() {
+      FutureBuilder(
+          future: FirebaseFirestore.instance.collection('Location').get(),
+          builder: (context, snapshot) {
+            final randomizedList = (snapshot.data! as QuerySnapshot).docs;
+            randomizedList.shuffle();
+            return ListView.builder(
+              itemCount: randomizedList.length,
+              padding: EdgeInsets.zero,
+              itemBuilder: (context, index) {
+                return Text(
+                  randomizedList[index]['locationName'],
+                );
+              },
+            );
+          });
+    }
+
+    String _sonuc = '';
+    Color? likeButton;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -123,6 +143,143 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ],
               ),
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection("Category")
+                  .where("categoryName")
+                  .snapshots(),
+              builder: ((context, snapshot) {
+                if (!snapshot.hasData) {
+                  return Center(child: CircularProgressIndicator());
+                } else {
+                  return Container(
+                    height: 50,
+                    width: MediaQuery.of(context).size.width - 100,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: snapshot.data!.docs.length,
+                      itemBuilder: (context, index) {
+                        DocumentSnapshot data = snapshot.data!.docs[index];
+                        return Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Container(
+                            width: 100,
+                            height: 50,
+                            decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(10),
+                                boxShadow: [
+                                  BoxShadow(
+                                      color: Colors.grey.shade300,
+                                      blurRadius: 5,
+                                      offset: Offset(0, 3))
+                                ]),
+                            child: Center(
+                              child: GestureDetector(
+                                onTap: () {
+                                  setState(() {});
+                                },
+                                child: Text(
+                                  data['categoryName'],
+                                  style: GoogleFonts.poppins(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 15),
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                }
+              }),
+            ),
+            SizedBox(
+              height: 20,
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: [
+                  Text(
+                    "Mekan Seç",
+                    style: GoogleFonts.poppins(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20),
+                  ),
+                ],
+              ),
+            ),
+            StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection("Location")
+                  .where("locationName")
+                  .snapshots(),
+              builder: ((context, snapshot) {
+                if (!snapshot.hasData) {
+                  return Center(child: CircularProgressIndicator());
+                } else {
+                  return Container(
+                    height: 50,
+                    width: MediaQuery.of(context).size.width - 100,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: snapshot.data!.docs.length,
+                      itemBuilder: (context, index) {
+                        DocumentSnapshot data = snapshot.data!.docs[index];
+                        return Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Container(
+                            width: 200,
+                            height: 50,
+                            decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(10),
+                                boxShadow: [
+                                  BoxShadow(
+                                      color: Colors.grey.shade300,
+                                      blurRadius: 5,
+                                      offset: Offset(0, 3))
+                                ]),
+                            child: Center(
+                              child: Text(
+                                data['locationName'],
+                                style: GoogleFonts.poppins(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                }
+              }),
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Text(
+              _sonuc,
+              style: GoogleFonts.poppins(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20),
             ),
           ],
         ),

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:elegant_notification/elegant_notification.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +10,8 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:myapp1/services/firebase_service.dart';
 import 'package:sn_progress_dialog/progress_dialog.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class HistoryPlace extends StatefulWidget {
   const HistoryPlace({super.key});
@@ -21,6 +25,7 @@ class _HistoryPlaceState extends State<HistoryPlace> {
   TextEditingController _locationTimeController = TextEditingController();
   TextEditingController _categoryController = TextEditingController();
   TextEditingController _adressController = TextEditingController();
+  TextEditingController _latlngController = TextEditingController();
   CollectionReference locationadd =
       FirebaseFirestore.instance.collection('Location');
 
@@ -56,6 +61,29 @@ class _HistoryPlaceState extends State<HistoryPlace> {
 
     await Future.delayed(Duration(milliseconds: 1000));
     pd.close();
+  }
+
+//Google maps'e yönlendirme kısmı :)
+  _launchMap() async {
+    final Stream<DocumentSnapshot<Map<String, dynamic>>> getLat =
+        FirebaseFirestore.instance
+            .collection("Location")
+            .doc('lat')
+            .snapshots();
+    final Stream<DocumentSnapshot<Map<String, dynamic>>> getLong =
+        FirebaseFirestore.instance
+            .collection("Location")
+            .doc('lng')
+            .snapshots();
+
+    final String encodedUrl = Uri.encodeFull(
+        'https://www.google.com/maps/search/?api=1&query=${getLat},${getLong}');
+
+    if (await canLaunch(encodedUrl)) {
+      await launch(encodedUrl);
+    } else {
+      throw 'Could not launch $encodedUrl';
+    }
   }
 
   String? _currentAddress;
@@ -302,12 +330,17 @@ class _HistoryPlaceState extends State<HistoryPlace> {
                                       _locationTimeController.text.isNotEmpty &&
                                       _categoryController.text.isNotEmpty) {
                                     await FirebaseService().insertLocation(
-                                        locationName:
-                                            _locationNameController.text,
-                                        locationTime:
-                                            _locationTimeController.text,
-                                        category: _categoryController.text,
-                                        adress: _adressController.text);
+                                      locationName:
+                                          _locationNameController.text,
+                                      locationTime:
+                                          _locationTimeController.text,
+                                      category: _categoryController.text,
+                                      adress: _adressController.text,
+                                      lat:
+                                          _currentPosition!.latitude.toString(),
+                                      lng: _currentPosition!.longitude
+                                          .toString(),
+                                    );
 
                                     ElegantNotification.success(
                                             progressIndicatorBackground:
@@ -463,7 +496,9 @@ class _HistoryPlaceState extends State<HistoryPlace> {
                                         fontWeight: FontWeight.bold)),
                                 trailing: GestureDetector(
                                     onTap: () {
+                                      print(_currentPosition);
                                       _onlyMessageProgress(context);
+                                      _launchMap();
                                     },
                                     child: FaIcon(
                                       FontAwesomeIcons.locationArrow,

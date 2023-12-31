@@ -9,12 +9,16 @@ class FirebaseService {
   Future<void> insertLocation(
       {required String locationName,
       required String locationTime,
+      required String lat,
+      required String lng,
       required String category,
       required String adress}) async {
     final location = FirebaseAuth.instance.currentUser;
     await locationPlace.add({
       'locationName': locationName,
       'locationTime': locationTime,
+      'lat': lat,
+      'lng': lng,
       'category': category,
       'adress': adress,
     });

@@ -116,40 +116,41 @@ class _LoginPageState extends State<LoginPage> {
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                ListTile(
-                                  title: Text(
-                                    person['displayName'],
-                                    style: GoogleFonts.poppins(
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  subtitle: Text(person['email'],
-                                      style: GoogleFonts.poppins(
-                                          color: Colors.grey,
-                                          fontWeight: FontWeight.bold)),
-                                  trailing: GestureDetector(
-                                      onTap: () {
-                                        _onlyMessageProgress(context);
-                                        Future.delayed(
-                                            const Duration(seconds: 3), () {
+                                GestureDetector(
+                                  onTap: () {
+                                    _onlyMessageProgress(context);
+                                    Future.delayed(const Duration(seconds: 3),
+                                        () {
 // Here you can write your code
 
-                                          setState(() {
-                                            Navigator.pushNamedAndRemoveUntil(
-                                                context,
-                                                '/bottomnavigationbar',
-                                                (route) => false);
-                                          });
-                                        });
-                                      },
-                                      child: FaIcon(
-                                        FontAwesomeIcons.locationArrow,
-                                        color: Colors.green,
-                                      )),
-                                  leading: CircleAvatar(
-                                    backgroundImage: AssetImage(
-                                      ('assets/images/logo.png'),
+                                      setState(() {
+                                        Navigator.pushNamedAndRemoveUntil(
+                                            context,
+                                            '/bottomnavigationbar',
+                                            (route) => false);
+                                      });
+                                    });
+                                  },
+                                  child: ListTile(
+                                    title: Text(
+                                      person['displayName'],
+                                      style: GoogleFonts.poppins(
+                                          fontWeight: FontWeight.bold),
                                     ),
-                                    radius: 20,
+                                    subtitle: Text(person['email'],
+                                        style: GoogleFonts.poppins(
+                                            color: Colors.grey,
+                                            fontWeight: FontWeight.bold)),
+                                    trailing: FaIcon(
+                                      FontAwesomeIcons.locationArrow,
+                                      color: Colors.green,
+                                    ),
+                                    leading: CircleAvatar(
+                                      backgroundImage: AssetImage(
+                                        ('assets/images/logo.png'),
+                                      ),
+                                      radius: 20,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -188,7 +189,9 @@ class _LoginPageState extends State<LoginPage> {
                         onPressed: () {
                           print('click');
                         })),
-                SizedBox(height: 10,),
+                SizedBox(
+                  height: 10,
+                ),
                 SizedBox(
                     width: MediaQuery.of(context).size.width / 1.2,
                     child: SignInButton(
@@ -196,7 +199,9 @@ class _LoginPageState extends State<LoginPage> {
                         onPressed: () {
                           print('click');
                         })),
-                SizedBox(height: 10,),
+                SizedBox(
+                  height: 10,
+                ),
                 SizedBox(
                     width: MediaQuery.of(context).size.width / 1.2,
                     child: SignInButton(
