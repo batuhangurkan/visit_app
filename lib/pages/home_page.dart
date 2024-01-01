@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:elegant_notification/elegant_notification.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -45,29 +47,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    _shuffleButton() {
-      FutureBuilder(
-          future: FirebaseFirestore.instance.collection('Location').get(),
-          builder: (context, snapshot) {
-            final randomizedList = (snapshot.data! as QuerySnapshot).docs;
-            randomizedList.shuffle();
-            return ListView.builder(
-              itemCount: randomizedList.length,
-              padding: EdgeInsets.zero,
-              itemBuilder: (context, index) {
-                return Text(
-                  randomizedList[index]['locationName'],
-                );
-              },
-            );
-          });
-    }
-
-    String _sonuc = '';
-    Color? likeButton;
+  Widget build(context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
           title: Text('Ana Sayfa',
               style: GoogleFonts.poppins(
@@ -123,165 +104,99 @@ class _HomePageState extends State<HomePage> {
             },
           )),
       body: Container(
-        width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height,
-        child: Column(
-          children: [
-            SizedBox(
-              height: 10,
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                children: [
-                  Text(
-                    "Kategori Seç",
-                    style: GoogleFonts.poppins(
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection("Category")
-                  .where("categoryName")
-                  .snapshots(),
-              builder: ((context, snapshot) {
-                if (!snapshot.hasData) {
-                  return Center(child: CircularProgressIndicator());
-                } else {
-                  return Container(
-                    height: 50,
-                    width: MediaQuery.of(context).size.width - 100,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: snapshot.data!.docs.length,
-                      itemBuilder: (context, index) {
-                        DocumentSnapshot data = snapshot.data!.docs[index];
-                        return Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Container(
-                            width: 100,
-                            height: 50,
-                            decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(10),
-                                boxShadow: [
-                                  BoxShadow(
-                                      color: Colors.grey.shade300,
-                                      blurRadius: 5,
-                                      offset: Offset(0, 3))
-                                ]),
-                            child: Center(
-                              child: GestureDetector(
-                                onTap: () {
-                                  setState(() {});
-                                },
-                                child: Text(
-                                  data['categoryName'],
-                                  style: GoogleFonts.poppins(
+        child: StreamBuilder(
+          stream: FirebaseFirestore.instance
+              .collection('Location')
+              .where('locationName')
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) return Text('Loading');
+
+            final docs = snapshot.data!.docs..shuffle();
+            return Container(
+              child: ListView.builder(
+                itemCount: docs.indexOf(docs.last),
+                itemBuilder: (BuildContext context, int index) {
+                  final user = docs[index];
+                  return Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Text('Bugün Nereye Gideceksin?',
+                          style: GoogleFonts.poppins(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          )),
+                      SizedBox(
+                        height: 25,
+                      ),
+                      Container(
+                          decoration: BoxDecoration(
+                              color: Colors.grey[200],
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(25))),
+                          child: ListTile(
+                            leading: Icon(
+                              FontAwesomeIcons.mapMarkerAlt,
+                              color: Colors.black,
+                            ),
+                            title: Text(
+                              'Gidilecek yer:' + ' ' + user['locationName'],
+                              style: GoogleFonts.poppins(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                            ),
+                            subtitle: user['adress'] != null
+                                ? Text(
+                                    user['adress'],
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 15,
                                       color: Colors.black,
+                                    ),
+                                  )
+                                : Text(
+                                    'Adres Bilgisi Yok',
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 15,
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 15),
-                                ),
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                          )),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      SizedBox(
+                        height: 50,
+                        width: MediaQuery.of(context).size.width / 1.2,
+                        child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green,
+                              shadowColor: Colors.black,
+                              elevation: 5,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(32.0),
                               ),
                             ),
-                          ),
-                        );
-                      },
-                    ),
+                            onPressed: () {
+                              setState(() {
+                                docs.shuffle();
+                              });
+                            },
+                            child: Text('Karıştır')),
+                      ),
+                    ],
                   );
-                }
-              }),
-            ),
-            SizedBox(
-              height: 20,
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                children: [
-                  Text(
-                    "Mekan Seç",
-                    style: GoogleFonts.poppins(
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20),
-                  ),
-                ],
+                },
               ),
-            ),
-            StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection("Location")
-                  .where("locationName")
-                  .snapshots(),
-              builder: ((context, snapshot) {
-                if (!snapshot.hasData) {
-                  return Center(child: CircularProgressIndicator());
-                } else {
-                  return Container(
-                    height: 50,
-                    width: MediaQuery.of(context).size.width - 100,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: snapshot.data!.docs.length,
-                      itemBuilder: (context, index) {
-                        DocumentSnapshot data = snapshot.data!.docs[index];
-                        return Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Container(
-                            width: 200,
-                            height: 50,
-                            decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(10),
-                                boxShadow: [
-                                  BoxShadow(
-                                      color: Colors.grey.shade300,
-                                      blurRadius: 5,
-                                      offset: Offset(0, 3))
-                                ]),
-                            child: Center(
-                              child: Text(
-                                data['locationName'],
-                                style: GoogleFonts.poppins(
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 15),
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  );
-                }
-              }),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            Text(
-              _sonuc,
-              style: GoogleFonts.poppins(
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20),
-            ),
-          ],
+            );
+          },
         ),
       ),
     );
